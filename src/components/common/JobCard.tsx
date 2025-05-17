@@ -61,21 +61,19 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
     formDataToSubmit.append('contact', contact);
 
     try {
-      const res = await api.post(`/candidate/apply/${job._id}`, formDataToSubmit, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        withCredentials: true,
+      const res = await fetch(`/apply/${job._id}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
       });
-
-      if (res.status !== 200) {
-        toast.error(res.data.message || 'Failed to apply');
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || 'Failed to apply');
       } else {
-        toast.success('Application submitted!');
-        handleCloseModal();
+        alert('Application submitted!');
       }
     } catch (err) {
-      toast.error('Error submitting application');
+      alert('Error submitting application');
     }
   };
 
