@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, Calendar, Clock, Users } from 'lucide-react';
 import { Job } from '../../types';
+import { apiUrl, endpoints } from '../../config/constants';
 
 interface JobCardProps {
   job: Job;
@@ -27,20 +28,20 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
     formData.append('cv', e.target.files[0]);
 
     try {
-      const res = await fetch(`/apply/${job._id}`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.message || 'Failed to apply');
-      } else {
-        alert('Application submitted!');
-      }
-    } catch (err) {
-      alert('Error submitting application');
+    const res = await fetch(`${apiUrl}${endpoints.applyJob(job._id)}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.message || 'Failed to apply');
+    } else {
+      alert('Application submitted!');
     }
+  } catch (err) {
+    alert('Error submitting application');
+  }
   };
 
   return (
