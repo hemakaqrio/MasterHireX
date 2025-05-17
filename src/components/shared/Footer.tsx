@@ -9,7 +9,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center mb-4">
               <Briefcase className="h-6 w-6 mr-2" />
-              <span className="text-xl font-bold">RecruitX</span>
+              <span className="text-xl font-bold">MasterHireX</span>
             </div>
             <p className="text-sm text-gray-300">
               Transforming recruitment with intelligent automation. Our platform helps you find the best candidates faster.
@@ -47,7 +47,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2" />
-                <span className="text-gray-300">hello@recruitx.com</span>
+                <span className="text-gray-300">hello@MasterHireX.com</span>
               </li>
               <li className="flex items-center">
                 <PhoneCall className="h-5 w-5 mr-2" />
@@ -56,12 +56,12 @@ const Footer = () => {
               <li className="flex items-center">
                 <Github className="h-5 w-5 mr-2" />
                 <a 
-                  href="https://github.com/recruitx"
+                  href="https://github.com/MasterHireX"
                   className="text-gray-300 hover:text-white transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  github.com/recruitx
+                  github.com/MasterHireX
                 </a>
               </li>
             </ul>
@@ -70,7 +70,7 @@ const Footer = () => {
         
         <div className="mt-8 pt-8 border-t border-gray-600">
           <p className="text-center text-sm text-gray-300">
-            &copy; {new Date().getFullYear()} RecruitX. All rights reserved.
+            &copy; {new Date().getFullYear()} MasterHireX. All rights reserved.
           </p>
         </div>
       </div>

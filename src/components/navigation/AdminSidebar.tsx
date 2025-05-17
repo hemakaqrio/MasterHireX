@@ -34,7 +34,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <Link to="/admin" className="flex items-center">
             <Briefcase className="h-8 w-8 text-primary mr-2" />
-            <span className="text-lg font-bold text-primary">RecruitX</span>
+            <span className="text-lg font-bold text-primary">MasterHireX</span>
           </Link>
           <button
             onClick={() => setIsOpen(false)}

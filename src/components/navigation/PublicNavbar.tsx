@@ -20,7 +20,7 @@ const PublicNavbar = () => {
           <div className="flex">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <Briefcase className="h-8 w-8 mr-2" />
-              <span className="font-bold text-xl">RecruitX</span>
+              <span className="font-bold text-xl">MasterHireX</span>
             </Link>
             
             <div className="hidden sm:ml-8 sm:flex sm:items-center sm:space-x-4">
