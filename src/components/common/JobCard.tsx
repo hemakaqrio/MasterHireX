@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, Calendar, Clock, Users } from 'lucide-react';
 import { Job } from '../../types';
@@ -14,6 +14,34 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
     month: 'short',
     day: 'numeric'
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleApplyClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const formData = new FormData();
+    formData.append('cv', e.target.files[0]);
+
+    try {
+      const res = await fetch(`/apply/${job._id}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || 'Failed to apply');
+      } else {
+        alert('Application submitted!');
+      }
+    } catch (err) {
+      alert('Error submitting application');
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
@@ -66,12 +94,22 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
             </Link>
           </div>
         ) : (
-          <Link 
-            to={`/candidate/jobs/${job._id}`} 
-            className="block w-full bg-blue-600 text-white text-center px-4 py-2 rounded-md hover:bg-blue-700 transition-all"
-          >
-            View Details
-          </Link>
+          <>
+            <button
+              onClick={handleApplyClick}
+              className="block w-full bg-blue-600 text-white text-center px-4 py-2 rounded-md hover:bg-blue-700 transition-all"
+              disabled={!job.isActive}
+            >
+              Apply
+            </button>
+            <input
+              type="file"
+              accept="application/pdf"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </>
         )}
       </div>
     </div>
