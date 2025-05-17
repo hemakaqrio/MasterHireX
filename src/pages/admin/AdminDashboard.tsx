@@ -1,215 +1,137 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Users, Award, BarChart2, TrendingUp, Calendar } from 'lucide-react';
-import { useJobsStore } from '../../store/jobsStore';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { format } from 'date-fns';
+import Layout from '../../components/common/Layout';
+import JobCard from '../../components/common/JobCard';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { Job } from '../../types';
+import { getAllJobs } from '../../services/jobService';
+import { PlusCircle, Briefcase, AlertCircle, Search } from 'lucide-react';
 
-const AdminDashboard = () => {
-  const { fetchAdminJobs, jobs, loading } = useJobsStore();
-  const [stats, setStats] = useState({
-    totalJobs: 0,
-    activeJobs: 0,
-    totalApplications: 0,
-    applicationRate: 0,
-  });
+const AdminDashboard: React.FC = () => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   useEffect(() => {
-    fetchAdminJobs();
-  }, [fetchAdminJobs]);
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const fetchedJobs = await getAllJobs();
+        setJobs(fetchedJobs);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load jobs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
   
-  useEffect(() => {
-    if (jobs.length > 0) {
-      const activeJobs = jobs.filter(job => job.isActive).length;
-      const totalApplications = jobs.reduce(
-        (sum, job) => sum + job.currentApplications, 
-        0
-      );
-      const applicationRate = totalApplications / jobs.length;
-      
-      setStats({
-        totalJobs: jobs.length,
-        activeJobs,
-        totalApplications,
-        applicationRate,
-      });
-    }
-  }, [jobs]);
-  
-  if (loading && jobs.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <LoadingSpinner size={40} />
-      </div>
-    );
-  }
-  
+  const filteredJobs = jobs.filter(job => 
+    job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.keywords?.some(keyword => 
+      keyword.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const activeJobsCount = jobs.filter(job => job.isActive).length;
+  const closedJobsCount = jobs.filter(job => !job.isActive).length;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Overview of your recruitment activities
-        </p>
-      </div>
-      
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-              <Briefcase className="h-6 w-6" />
+    <Layout>
+      <div className="bg-gray-100 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+              <p className="text-gray-600">Manage job vacancies and review applications</p>
             </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Total Jobs</h2>
-              <span className="text-3xl font-semibold text-gray-900">{stats.totalJobs}</span>
+            
+            <Link 
+              to="/admin/jobs/create" 
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all flex items-center gap-2"
+            >
+              <PlusCircle size={18} />
+              <span>Create New Job</span>
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <h3 className="text-lg font-medium text-gray-700 mb-2">Total Job Vacancies</h3>
+              <p className="text-3xl font-bold text-gray-900">{jobs.length}</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <h3 className="text-lg font-medium text-gray-700 mb-2">Active Jobs</h3>
+              <p className="text-3xl font-bold text-green-600">{activeJobsCount}</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <h3 className="text-lg font-medium text-gray-700 mb-2">Closed Jobs</h3>
+              <p className="text-3xl font-bold text-red-600">{closedJobsCount}</p>
             </div>
           </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <TrendingUp className="h-6 w-6" />
+          
+          <div className="relative max-w-md mb-6">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={20} className="text-gray-400" />
             </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Active Jobs</h2>
-              <span className="text-3xl font-semibold text-gray-900">{stats.activeJobs}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-purple-100 text-purple-600">
-              <Users className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Total Applications</h2>
-              <span className="text-3xl font-semibold text-gray-900">{stats.totalApplications}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-              <BarChart2 className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Avg. Applications</h2>
-              <span className="text-3xl font-semibold text-gray-900">
-                {stats.applicationRate.toFixed(1)}
-              </span>
-            </div>
+            <input
+              type="text"
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
         </div>
       </div>
       
-      {/* Recent Jobs */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Recent Jobs</h2>
-          <Link to="/admin/jobs" className="text-sm font-medium text-primary hover:text-primary/80">
-            View all
-          </Link>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <h2 className="text-xl font-semibold mb-6 text-gray-800">All Job Vacancies</h2>
         
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Job Title
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Applications
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Posted Date
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {jobs.slice(0, 5).map((job) => (
-                <tr key={job._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{job.title}</div>
-                    <div className="text-sm text-gray-500">{job.company}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      job.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {job.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {job.currentApplications} / {job.maxApplications}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <Calendar className="mr-1.5 h-4 w-4 text-gray-400" />
-                      {format(new Date(job.createdAt), 'MMM dd, yyyy')}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link 
-                      to={`/admin/jobs/${job._id}/applications`}
-                      className="text-primary hover:text-primary/80 mr-4"
-                    >
-                      View Applications
-                    </Link>
-                    <Link 
-                      to={`/admin/jobs/edit/${job._id}`}
-                      className="text-gray-600 hover:text-gray-900"
-                    >
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              
-              {jobs.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                    No jobs found. <Link to="/admin/jobs/new" className="text-primary font-medium">Create your first job</Link>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      {/* Top Candidates */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Top Candidates</h2>
-          <Link to="/admin/filtered" className="text-sm font-medium text-primary hover:text-primary/80">
-            View all
-          </Link>
-        </div>
-        
-        <div className="p-6">
-          <div className="text-center py-8">
-            <Award className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No filtered candidates yet</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Start reviewing applications and filter candidates to see them here.
+        {loading ? (
+          <LoadingSpinner />
+        ) : error ? (
+          <div className="bg-red-50 p-4 rounded-md text-red-700">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={24} className="mt-0.5" />
+              <span>{error}</span>
+            </div>
+          </div>
+        ) : filteredJobs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredJobs.map(job => (
+              <JobCard key={job._id} job={job} isAdmin={true} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <div className="inline-block bg-gray-100 p-4 rounded-full mb-4">
+              <Briefcase size={40} className="text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Jobs Found</h3>
+            <p className="text-gray-500 mb-6">
+              {searchTerm 
+                ? `No jobs match your search for "${searchTerm}". Try different keywords.` 
+                : 'You haven\'t created any job listings yet.'}
             </p>
+            <Link 
+              to="/admin/jobs/create" 
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 inline-flex items-center gap-2"
+            >
+              <PlusCircle size={18} />
+              <span>Create Your First Job</span>
+            </Link>
           </div>
-        </div>
+        )}
       </div>
-    </div>
+    </Layout>
   );
 };
 
