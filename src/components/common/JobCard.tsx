@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Paperclip } from 'lucide-react';
+import { Calendar, Users, Paperclip, Clipboard } from 'lucide-react'; // Import the Clipboard icon
 import { Job } from '../../types';
 import api from '../../config/axios';
 import { toast } from 'react-toastify';
@@ -79,10 +79,33 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
     }
   };
 
+  const handleCopyLink = () => {
+    const applicationLink = `${window.location.origin}/candidate`; // Generate the application link
+    navigator.clipboard.writeText(applicationLink)
+      .then(() => {
+        toast.success('Job application link copied to clipboard!');
+      })
+      .catch((err) => {
+        toast.error('Failed to copy link');
+      });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-xl font-semibold text-gray-800">{job.title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-xl font-semibold text-gray-800">{job.title}</h3>
+
+          {/* Icon Button for Copy Link */}
+          <button
+            onClick={handleCopyLink}
+            className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
+            aria-label="Copy Application Link"
+          >
+            <Clipboard size={18} className="text-gray-600" />
+          </button>
+        </div>
+        
         <div
           className={`px-3 py-1 rounded-full text-xs font-medium ${
             job.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

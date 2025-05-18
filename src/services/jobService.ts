@@ -7,7 +7,7 @@ export const getJobs = async (): Promise<Job[]> => {
 };
 
 export const getJob = async (id: string): Promise<Job> => {
-  const response = await api.get<Job>(`/candidate/jobs/${id}`);
+  const response = await api.get<Job>(`/admin/jobs/${id}`);
   return response.data;
 };
 
