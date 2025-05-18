@@ -16,7 +16,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    contact: '',
+    phoneNumber: '',
     cv: null as File | null,
   });
 
@@ -32,7 +32,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setFormData({ name: '', email: '', contact: '', cv: null });
+    setFormData({ name: '', email: '', phoneNumber: '', cv: null });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,8 +48,8 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { name, email, contact, cv } = formData;
-    if (!cv || !name || !email || !contact) {
+    const { name, email, phoneNumber, cv } = formData;
+    if (!cv || !name || !email || !phoneNumber) {
       toast.error('All fields are required');
       return;
     }
@@ -58,7 +58,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
     formDataToSubmit.append('cv', cv);
     formDataToSubmit.append('name', name);
     formDataToSubmit.append('email', email);
-    formDataToSubmit.append('contact', contact);
+    formDataToSubmit.append('phoneNumber', phoneNumber);
 
     try {
       const res = await api.post(`/candidate/apply/${job._id}`, formDataToSubmit, {
@@ -174,13 +174,13 @@ const JobCard: React.FC<JobCardProps> = ({ job, isAdmin = false }) => {
               </div>
 
               <div className="mb-4">
-                <label htmlFor="contact" className="block text-sm font-medium text-gray-700">Contact Number</label>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">Phone Number</label>
                 <input
                   type="text"
-                  name="contact"
-                  id="contact"
+                  name="phoneNumber"
+                  id="phoneNumber"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={formData.contact}
+                  value={formData.phoneNumber}
                   onChange={handleInputChange}
                   required
                 />
